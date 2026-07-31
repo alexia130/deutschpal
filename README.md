@@ -1,46 +1,36 @@
-# 🇩🇪 DeutschPal
+# DeutschPal
 
-A modern German vocabulary learning application built with React, TypeScript and Vite.
+DeutschPal is a modern German vocabulary learning application built with React, TypeScript and Vite.
 
-**Version:** 1.0.0
-
-DeutschPal helps learners organize vocabulary, practice different grammar aspects, track their learning progress and review difficult words through adaptive exercises.
+The application helps learners organize vocabulary, practice different aspects of the German language, monitor learning progress and improve long-term retention through adaptive practice sessions.
 
 ---
 
-## ✨ Features
+## Features
 
-### 📚 Vocabulary Manager
+### Vocabulary Management
 
 - Add, edit and delete vocabulary
-- Support for:
-  - Nouns
-  - Verbs
-  - Adjectives
-  - Expressions
+- Support for nouns, verbs, adjectives and expressions
 - Favorites
-- Search and filters
-- Word profile page
+- Search and filtering
 - Personal examples
+- Word profile page
 
----
+### Practice
 
-### 🧠 Practice Modes
-
-- Meaning
-- Articles
-- Plurals
-- Präteritum
-- Perfekt
-- Comparative
+- Meaning practice
+- Article practice
+- Plural practice
+- Präteritum practice
+- Perfekt practice
+- Comparative practice
 - Mixed practice
 - Context practice
 
----
+### Verb Trainer
 
-### 📖 Verb Trainer
-
-Practice irregular German verbs with dedicated exercises:
+Dedicated practice mode for German verbs including:
 
 - Infinitive
 - Meaning
@@ -50,28 +40,24 @@ Practice irregular German verbs with dedicated exercises:
 - Auxiliary verb
 - Mixed mode
 
-Additional features:
+Additional functionality:
 
 - Pronunciation
 - Level filtering
-- Letter filtering
+- Initial-letter filtering
 - Favorite verbs
 - Progress tracking
 
----
-
-### 📈 Learning Progress
+### Learning Analytics
 
 - Knowledge Map
 - Learning Timeline
-- Mistake History
 - Learning Coach
+- Mistake history
 - Adaptive recommendations
-- Mastery calculation
+- Word mastery tracking
 
----
-
-### 💾 Import & Export
+### Import and Export
 
 - JSON backup
 - JSON import
@@ -82,7 +68,7 @@ Additional features:
 
 ---
 
-## 🛠️ Tech Stack
+## Technology Stack
 
 - React
 - TypeScript
@@ -90,31 +76,31 @@ Additional features:
 - React Router
 - Tailwind CSS
 - LocalStorage
-- Lucide Icons
+- Lucide React
 
 ---
 
-## 🚀 Getting Started
+## Installation
 
-Clone the repository
+Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/deutschpal.git
+git clone https://github.com/<your-username>/deutschpal.git
 ```
 
-Install dependencies
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Start development server
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Build production version
+Create a production build:
 
 ```bash
 npm run build
@@ -122,32 +108,51 @@ npm run build
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src/
- ├── app/
- ├── features/
- ├── pages/
- ├── shared/
- └── components/
+│
+├── app/
+├── features/
+├── pages/
+├── shared/
+└── components/
+```
+
+The application follows a feature-oriented architecture where each major module contains its own components, hooks, business logic and types.
+
+---
+
+## Main Modules
+
+```
+Vocabulary
+Practice
+Verb Trainer
+Knowledge Map
+Learning Coach
+Mistakes
+Timeline
+Settings
 ```
 
 ---
 
-## 🎯 Future Improvements
+## Future Improvements
 
-- Dark mode
+Future versions may include:
+
 - User authentication
 - Cloud synchronization
-- Mobile version
-- AI conversation practice
+- Mobile application
+- Dark mode
 - Speech recognition
+- AI conversation practice
 - Advanced spaced repetition
 
 ---
 
+## License
 
-## 📄 License
-
-This project was created for educational purposes.
+This project was developed for educational and personal learning purposes.
