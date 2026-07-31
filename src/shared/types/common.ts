@@ -70,6 +70,10 @@ export interface BaseVocabularyItem {
   german: string;
   level: VocabularyLevel;
   favorite: boolean;
+
+  book?: string;
+  lesson?: string;
+
   createdAt: string;
   updatedAt: string;
   review: VocabularyReview;
