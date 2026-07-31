@@ -139,7 +139,7 @@ Settings
 
 ---
 
-## Future Improvements
+## Roadmap
 
 Future versions may include:
 
