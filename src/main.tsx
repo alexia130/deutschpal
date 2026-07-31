@@ -1,0 +1,20 @@
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+
+import "./index.css";
+import { router } from "./app/router/router";
+
+import {
+  LearningTimelineProvider,
+} from "./features/timeline/context/LearningTimelineProvider";
+
+createRoot(
+  document.getElementById("root")!,
+).render(
+  <StrictMode>
+    <LearningTimelineProvider>
+      <RouterProvider router={router} />
+    </LearningTimelineProvider>
+  </StrictMode>,
+);
