@@ -627,6 +627,27 @@ function createImportedItem(
         ? levelValue
         : "B1";
 
+  const book =
+    getCell(
+      row,
+      headerIndexes,
+      [
+        "book",
+        "carte",
+      ],
+    ).trim();
+
+  const lesson =
+    getCell(
+      row,
+      headerIndexes,
+      [
+        "lesson",
+        "lectie",
+        "lecție",
+      ],
+    ).trim();
+
   const translation =
     getCell(
       row,
@@ -686,6 +707,13 @@ function createImportedItem(
     type,
     german,
     level,
+
+    book:
+      book || undefined,
+
+    lesson:
+      lesson || undefined,
+
     favorite: false,
     createdAt: now,
     updatedAt: now,
@@ -1090,17 +1118,18 @@ export function VocabularyBackupActions({
         parsedResult.items,
       );
 
-      if (
-        uniqueItems.length > 0
-      ) {
-        onImport(uniqueItems);
-      }
+      // Send every valid item to the vocabulary store.
+      // New words are added, while existing words only receive
+      // updated metadata such as book and lesson.
+      onImport(
+        parsedResult.items,
+      );
 
       setMessage({
         type: "success",
         text:
           `Import complete: ${uniqueItems.length} added, ` +
-          `${skippedDuplicates} duplicates skipped, ` +
+          `${skippedDuplicates} existing words updated, ` +
           `${parsedResult.invalidRows} invalid rows skipped.`,
       });
     } catch (error) {
@@ -1148,7 +1177,7 @@ export function VocabularyBackupActions({
       </div>
 
       <p className="max-w-sm text-right text-xs text-[#938C85]">
-        JSON, CSV and TSV are supported. Duplicate words are ignored automatically.
+        JSON, CSV and TSV are supported. Existing words are updated without creating duplicates.
       </p>
 
       {message && (

@@ -30,6 +30,7 @@ import Card from "../shared/ui/Card";
 import type {
   VocabularyItem,
   VocabularyLevel,
+  VocabularyType,
 } from "../shared/types/vocabulary";
 import type { SavedPracticeType } from "../shared/types/practice";
 
@@ -50,6 +51,24 @@ type PracticeLevelFilter =
   | "all"
   | VocabularyLevel;
 
+type PracticeVocabularyTypeFilter =
+  | "all"
+  | VocabularyType;
+
+type PracticeBookFilter =
+  | "all"
+  | string;
+
+type PracticeLessonFilter =
+  | "all"
+  | string;
+
+type PracticeQuestionCount =
+  | "10"
+  | "20"
+  | "50"
+  | "all";
+
 type Question = {
   id: string;
   item: VocabularyItem;
@@ -65,7 +84,21 @@ type AnswerResult = {
   correct: boolean;
 };
 
-const MAX_QUESTIONS = 10;
+function getQuestionLimit(
+  selectedQuestionCount:
+    PracticeQuestionCount,
+) {
+  if (
+    selectedQuestionCount ===
+    "all"
+  ) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return Number(
+    selectedQuestionCount,
+  );
+}
 
 const practiceOptions: {
   value: PracticeType;
@@ -103,11 +136,26 @@ const practiceOptions: {
 
 function normalizeAnswer(
   value: string,
+  ignoreDiacritics = false,
 ) {
-  return value
-    .trim()
-    .toLocaleLowerCase("de-DE")
-    .replace(/\s+/g, " ");
+  const normalizedValue =
+    value
+      .trim()
+      .toLocaleLowerCase(
+        "de-DE",
+      )
+      .replace(/\s+/g, " ");
+
+  if (!ignoreDiacritics) {
+    return normalizedValue;
+  }
+
+  return normalizedValue
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      "",
+    );
 }
 
 function shuffleArray<T>(
@@ -403,6 +451,11 @@ function filterEligibleItems(
   items: VocabularyItem[],
   practiceType: PracticeType,
   selectedLevel: PracticeLevelFilter,
+  selectedVocabularyType:
+    PracticeVocabularyTypeFilter,
+  selectedBook: PracticeBookFilter,
+  selectedLesson:
+    PracticeLessonFilter,
   favoritesOnly: boolean,
 ) {
   return items.filter((item) => {
@@ -410,12 +463,30 @@ function filterEligibleItems(
       selectedLevel === "all" ||
       item.level === selectedLevel;
 
+    const matchesVocabularyType =
+      selectedVocabularyType ===
+        "all" ||
+      item.type ===
+        selectedVocabularyType;
+
+    const matchesBook =
+      selectedBook === "all" ||
+      item.book === selectedBook;
+
+    const matchesLesson =
+      selectedLesson === "all" ||
+      item.lesson ===
+        selectedLesson;
+
     const matchesFavorite =
       !favoritesOnly ||
       item.favorite;
 
     return (
       matchesLevel &&
+      matchesVocabularyType &&
+      matchesBook &&
+      matchesLesson &&
       matchesFavorite &&
       supportsPracticeType(
         item,
@@ -429,20 +500,29 @@ function createQuestions(
   items: VocabularyItem[],
   practiceType: PracticeType,
   selectedLevel: PracticeLevelFilter,
+  selectedVocabularyType:
+    PracticeVocabularyTypeFilter,
+  selectedBook: PracticeBookFilter,
+  selectedLesson:
+    PracticeLessonFilter,
   favoritesOnly: boolean,
+  questionLimit: number,
 ) {
   const eligibleItems =
     filterEligibleItems(
       items,
       practiceType,
       selectedLevel,
+      selectedVocabularyType,
+      selectedBook,
+      selectedLesson,
       favoritesOnly,
     );
 
   return shuffleArray(
     eligibleItems,
   )
-    .slice(0, MAX_QUESTIONS)
+    .slice(0, questionLimit)
     .map((item) =>
       createQuestion(
         item,
@@ -572,6 +652,38 @@ function PracticePage() {
     );
 
   const [
+    selectedVocabularyType,
+    setSelectedVocabularyType,
+  ] =
+    useState<PracticeVocabularyTypeFilter>(
+      "all",
+    );
+
+  const [
+    selectedBook,
+    setSelectedBook,
+  ] =
+    useState<PracticeBookFilter>(
+      "all",
+    );
+
+  const [
+    selectedLesson,
+    setSelectedLesson,
+  ] =
+    useState<PracticeLessonFilter>(
+      "all",
+    );
+
+  const [
+    selectedQuestionCount,
+    setSelectedQuestionCount,
+  ] =
+    useState<PracticeQuestionCount>(
+      "10",
+    );
+
+  const [
     favoritesOnly,
     setFavoritesOnly,
   ] = useState(false);
@@ -626,6 +738,91 @@ function PracticePage() {
     currentIndex >=
       questions.length;
 
+  const questionLimit =
+    getQuestionLimit(
+      selectedQuestionCount,
+    );
+
+  const availableBooks =
+    useMemo(
+      () =>
+        Array.from(
+          new Set(
+            items
+              .map((item) =>
+                item.book?.trim(),
+              )
+              .filter(
+                (
+                  book,
+                ): book is string =>
+                  Boolean(book),
+              ),
+          ),
+        ).sort((first, second) =>
+          first.localeCompare(
+            second,
+          ),
+        ),
+      [items],
+    );
+
+  const availableLessons =
+    useMemo(
+      () =>
+        Array.from(
+          new Set(
+            items
+              .filter(
+                (item) =>
+                  selectedBook ===
+                    "all" ||
+                  item.book ===
+                    selectedBook,
+              )
+              .map((item) =>
+                item.lesson?.trim(),
+              )
+              .filter(
+                (
+                  lesson,
+                ): lesson is string =>
+                  Boolean(lesson),
+              ),
+          ),
+        ).sort(
+          (first, second) => {
+            const firstNumber =
+              Number(first);
+
+            const secondNumber =
+              Number(second);
+
+            if (
+              Number.isFinite(
+                firstNumber,
+              ) &&
+              Number.isFinite(
+                secondNumber,
+              )
+            ) {
+              return (
+                firstNumber -
+                secondNumber
+              );
+            }
+
+            return first.localeCompare(
+              second,
+            );
+          },
+        ),
+      [
+        items,
+        selectedBook,
+      ],
+    );
+
   const dueItems =
     useMemo(
       () => getDueItems(),
@@ -654,6 +851,21 @@ function PracticePage() {
             );
 
           if (!item) {
+            return null;
+          }
+
+          const matchesFilters =
+            filterEligibleItems(
+              [item],
+              "mixed",
+              selectedLevel,
+              selectedVocabularyType,
+              selectedBook,
+              selectedLesson,
+              favoritesOnly,
+            ).length > 0;
+
+          if (!matchesFilters) {
             return null;
           }
 
@@ -686,30 +898,72 @@ function PracticePage() {
             secondSelection.priority -
             firstSelection.priority,
         );
-    }, [items, mistakes]);
+    }, [
+      items,
+      mistakes,
+      selectedLevel,
+      selectedVocabularyType,
+      selectedBook,
+      selectedLesson,
+      favoritesOnly,
+    ]);
 
   const sourceItems =
     practiceMode === "review"
       ? dueItems
       : items;
 
+  const filteredSourceItems =
+    useMemo(
+      () =>
+        filterEligibleItems(
+          sourceItems,
+          practiceType,
+          selectedLevel,
+          selectedVocabularyType,
+          selectedBook,
+          selectedLesson,
+          favoritesOnly,
+        ),
+      [
+        sourceItems,
+        practiceType,
+        selectedLevel,
+        selectedVocabularyType,
+        selectedBook,
+        selectedLesson,
+        favoritesOnly,
+      ],
+    );
+
   const adaptiveSelections =
     useMemo(
       () =>
         generateAdaptivePractice(
-          items,
+          filterEligibleItems(
+            items,
+            "mixed",
+            selectedLevel,
+            selectedVocabularyType,
+            selectedBook,
+            selectedLesson,
+            favoritesOnly,
+          ),
           {
             maxQuestions:
-              MAX_QUESTIONS,
-            level:
-              selectedLevel,
-            favoritesOnly,
+              questionLimit,
+            level: "all",
+            favoritesOnly: false,
           },
         ),
       [
         items,
         selectedLevel,
+        selectedVocabularyType,
+        selectedBook,
+        selectedLesson,
         favoritesOnly,
+        questionLimit,
       ],
     );
 
@@ -737,24 +991,23 @@ function PracticePage() {
       ) {
         return Math.min(
           openMistakeSelections.length,
-          MAX_QUESTIONS,
+          questionLimit,
         );
       }
 
-      return filterEligibleItems(
-        sourceItems,
-        practiceType,
-        selectedLevel,
-        favoritesOnly,
-      ).length;
+      return filteredSourceItems.length;
     }, [
       adaptiveSelections,
       openMistakeSelections,
-      sourceItems,
+      filteredSourceItems,
       practiceMode,
       practiceType,
       selectedLevel,
+      selectedVocabularyType,
+      selectedBook,
+      selectedLesson,
       favoritesOnly,
+      questionLimit,
     ]);
 
   const correctAnswersCount =
@@ -848,7 +1101,7 @@ function PracticePage() {
           ? openMistakeSelections
               .slice(
                 0,
-                MAX_QUESTIONS,
+                questionLimit,
               )
               .map((selection) =>
                 createQuestion(
@@ -866,7 +1119,11 @@ function PracticePage() {
             sourceItems,
             practiceType,
             selectedLevel,
+            selectedVocabularyType,
+            selectedBook,
+            selectedLesson,
             favoritesOnly,
+            questionLimit,
           );
 
     savedResultRef.current =
@@ -917,12 +1174,18 @@ function PracticePage() {
       return;
     }
 
+    const ignoreDiacritics =
+      currentQuestion.type ===
+      "meaning";
+
     const isCorrect =
       normalizeAnswer(
         userAnswer,
+        ignoreDiacritics,
       ) ===
       normalizeAnswer(
         currentQuestion.correctAnswer,
+        ignoreDiacritics,
       );
 
     setCurrentAnswerCorrect(
@@ -1294,6 +1557,162 @@ function PracticePage() {
                   </select>
                 </label>
 
+                <label>
+                  <span className="mb-2 block text-sm font-medium text-[#4D4843]">
+                    Vocabulary type
+                  </span>
+
+                  <select
+                    value={
+                      selectedVocabularyType
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setSelectedVocabularyType(
+                        event.target
+                          .value as PracticeVocabularyTypeFilter,
+                      )
+                    }
+                    className="min-h-12 w-full rounded-xl border border-[#E4DED8] bg-white px-4 text-sm outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                  >
+                    <option value="all">
+                      All types
+                    </option>
+
+                    <option value="noun">
+                      Nouns
+                    </option>
+
+                    <option value="verb">
+                      Verbs
+                    </option>
+
+                    <option value="adjective">
+                      Adjectives
+                    </option>
+
+                    <option value="expression">
+                      Expressions
+                    </option>
+                  </select>
+                </label>
+
+                <label>
+                  <span className="mb-2 block text-sm font-medium text-[#4D4843]">
+                    Book
+                  </span>
+
+                  <select
+                    value={
+                      selectedBook
+                    }
+                    onChange={(
+                      event,
+                    ) => {
+                      setSelectedBook(
+                        event.target.value,
+                      );
+
+                      setSelectedLesson(
+                        "all",
+                      );
+                    }}
+                    className="min-h-12 w-full rounded-xl border border-[#E4DED8] bg-white px-4 text-sm outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                  >
+                    <option value="all">
+                      All books
+                    </option>
+
+                    {availableBooks.map(
+                      (book) => (
+                        <option
+                          key={book}
+                          value={book}
+                        >
+                          {book}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
+
+                <label>
+                  <span className="mb-2 block text-sm font-medium text-[#4D4843]">
+                    Lesson
+                  </span>
+
+                  <select
+                    value={
+                      selectedLesson
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setSelectedLesson(
+                        event.target.value,
+                      )
+                    }
+                    disabled={
+                      availableLessons.length ===
+                      0
+                    }
+                    className="min-h-12 w-full rounded-xl border border-[#E4DED8] bg-white px-4 text-sm outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="all">
+                      All lessons
+                    </option>
+
+                    {availableLessons.map(
+                      (lesson) => (
+                        <option
+                          key={lesson}
+                          value={lesson}
+                        >
+                          Lesson {lesson}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
+
+                <label>
+                  <span className="mb-2 block text-sm font-medium text-[#4D4843]">
+                    Number of questions
+                  </span>
+
+                  <select
+                    value={
+                      selectedQuestionCount
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setSelectedQuestionCount(
+                        event.target
+                          .value as PracticeQuestionCount,
+                      )
+                    }
+                    className="min-h-12 w-full rounded-xl border border-[#E4DED8] bg-white px-4 text-sm outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                  >
+                    <option value="10">
+                      10 questions
+                    </option>
+
+                    <option value="20">
+                      20 questions
+                    </option>
+
+                    <option value="50">
+                      50 questions
+                    </option>
+
+                    <option value="all">
+                      All matching words
+                    </option>
+                  </select>
+                </label>
+
                 <label className="flex min-h-12 items-center gap-3 self-end rounded-xl border border-[#E4DED8] bg-white px-4">
                   <input
                     type="checkbox"
@@ -1402,10 +1821,13 @@ function PracticePage() {
                   : practiceMode ===
                       "mistakes"
                     ? `${eligibleItemsCount} unresolved mistakes were selected for focused practice.`
-                    : `${Math.min(
-                      eligibleItemsCount,
-                      MAX_QUESTIONS,
-                    )} questions will be generated.`
+                    : selectedQuestionCount ===
+                        "all"
+                      ? `${eligibleItemsCount} questions will be generated.`
+                      : `${Math.min(
+                        eligibleItemsCount,
+                        questionLimit,
+                      )} questions will be generated.`
                 : practiceMode ===
                     "mistakes"
                   ? "You have no unresolved mistakes to practise."
@@ -1727,6 +2149,28 @@ function PracticePage() {
                 currentQuestion
                   .item.level
               }
+
+              {currentQuestion.item
+                .book && (
+                <>
+                  {" · "}
+                  {
+                    currentQuestion
+                      .item.book
+                  }
+                </>
+              )}
+
+              {currentQuestion.item
+                .lesson && (
+                <>
+                  {" · Lesson "}
+                  {
+                    currentQuestion
+                      .item.lesson
+                  }
+                </>
+              )}
             </p>
           </div>
 
