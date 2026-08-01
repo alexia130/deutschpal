@@ -487,6 +487,16 @@ function normalizeVocabularyItem(
 
     level,
 
+    book:
+      getString(
+        value.book,
+      ).trim() || undefined,
+
+    lesson:
+      getString(
+        value.lesson,
+      ).trim() || undefined,
+
     favorite: getBoolean(
       value.favorite,
       false,
@@ -1115,40 +1125,88 @@ export function useVocabulary() {
       );
 
     setItems((currentItems) => {
-      const knownWords =
-        new Set(
-          currentItems.map(
-            createVocabularyKey,
-          ),
-        );
-
-      const uniqueImportedItems:
-        VocabularyItem[] = [];
+      const importedByKey =
+        new Map<
+          string,
+          VocabularyItem
+        >();
 
       normalizedImportedItems.forEach(
         (item) => {
-          const key =
+          importedByKey.set(
             createVocabularyKey(
               item,
-            );
-
-          if (
-            knownWords.has(key)
-          ) {
-            return;
-          }
-
-          knownWords.add(key);
-
-          uniqueImportedItems.push(
+            ),
             item,
           );
         },
       );
 
+      const updatedCurrentItems =
+        currentItems.map(
+          (currentItem) => {
+            const key =
+              createVocabularyKey(
+                currentItem,
+              );
+
+            const importedItem =
+              importedByKey.get(
+                key,
+              );
+
+            if (!importedItem) {
+              return currentItem;
+            }
+
+            importedByKey.delete(
+              key,
+            );
+
+            const importedBook =
+              importedItem.book?.trim();
+
+            const importedLesson =
+              importedItem.lesson?.trim();
+
+            const metadataChanged =
+              (importedBook &&
+                importedBook !==
+                  currentItem.book) ||
+              (importedLesson &&
+                importedLesson !==
+                  currentItem.lesson);
+
+            if (!metadataChanged) {
+              return currentItem;
+            }
+
+            return {
+              ...currentItem,
+
+              book:
+                importedBook ||
+                currentItem.book,
+
+              lesson:
+                importedLesson ||
+                currentItem.lesson,
+
+              updatedAt:
+                new Date()
+                  .toISOString(),
+            };
+          },
+        );
+
+      const newItems =
+        Array.from(
+          importedByKey.values(),
+        );
+
       return [
-        ...uniqueImportedItems,
-        ...currentItems,
+        ...newItems,
+        ...updatedCurrentItems,
       ];
     });
   }
