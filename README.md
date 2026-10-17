@@ -1,36 +1,43 @@
-# DeutschPal
 
-DeutschPal is a modern German vocabulary learning application built with React, TypeScript and Vite.
+# DeutschPal 🇩🇪
 
-The application helps learners organize vocabulary, practice different aspects of the German language, monitor learning progress and improve long-term retention through adaptive practice sessions.
+**A German vocabulary learning application built with React, TypeScript, and Vite.**
 
----
+DeutschPal is an interactive web application designed to help German language learners organize vocabulary, practice grammar, track learning progress, and improve long-term retention.
 
-## Features
+Rather than relying only on static vocabulary lists, the application combines vocabulary management, targeted practice exercises, mistake tracking, and personalized learning insights in one interface.
 
-### Vocabulary Management
+## Key Features
 
-- Add, edit and delete vocabulary
-- Support for nouns, verbs, adjectives and expressions
-- Favorites
-- Search and filtering
-- Personal examples
-- Word profile page
+### 📚 Vocabulary Management
 
-### Practice
+- Add, edit, and delete vocabulary entries
+- Organize nouns, verbs, adjectives, and expressions
+- Mark vocabulary as favorites
+- Search and filter vocabulary
+- Store personal examples
+- View individual word profiles
 
-- Meaning practice
-- Article practice
-- Plural practice
-- Präteritum practice
-- Perfekt practice
-- Comparative practice
-- Mixed practice
-- Context practice
+### 🎯 Interactive Practice
 
-### Verb Trainer
+Practice vocabulary through different exercise modes:
 
-Dedicated practice mode for German verbs including:
+- **Meaning Practice** — recall word meanings
+- **Article Practice** — practice German noun articles
+- **Plural Practice** — learn noun plural forms
+- **Präteritum Practice** — review past-tense verb forms
+- **Perfekt Practice** — practice perfect-tense constructions
+- **Comparative Practice** — review adjective comparisons
+- **Mixed Practice** — combine different question types
+- **Context Practice** — practice vocabulary in context
+
+Practice sessions help learners identify difficult words and review their knowledge.
+
+### 🔤 Verb Trainer
+
+A dedicated module for practicing German verbs.
+
+Supported practice categories include:
 
 - Infinitive
 - Meaning
@@ -40,52 +47,110 @@ Dedicated practice mode for German verbs including:
 - Auxiliary verb
 - Mixed mode
 
-Additional functionality:
+Additional capabilities include pronunciation, level filtering, initial-letter filtering, favorite verbs, and progress tracking.
 
-- Pronunciation
-- Level filtering
-- Initial-letter filtering
-- Favorite verbs
-- Progress tracking
+### 📊 Learning Analytics
 
-### Learning Analytics
+DeutschPal includes several features for monitoring learning activity:
 
-- Knowledge Map
-- Learning Timeline
-- Learning Coach
-- Mistake history
-- Adaptive recommendations
-- Word mastery tracking
+- **Knowledge Map** — visualize vocabulary knowledge
+- **Learning Timeline** — review learning activity over time
+- **Learning Coach** — receive learning guidance
+- **Mistake History** — identify frequently missed vocabulary
+- **Word Mastery Tracking** — monitor vocabulary progress
+- **Adaptive Recommendations** — support targeted revision
 
-### Import and Export
+These features aim to make learning progress more visible and help learners prioritize their practice.
 
-- JSON backup
-- JSON import
-- CSV import
-- TSV import
-- Automatic duplicate detection
-- Vocabulary restore
+### 💾 Import and Export
 
----
+- Export vocabulary as a JSON backup
+- Import vocabulary from JSON
+- Import CSV and TSV files
+- Detect duplicate entries
+- Restore vocabulary from backups
 
 ## Technology Stack
 
-- React
-- TypeScript
-- Vite
-- React Router
-- Tailwind CSS
-- LocalStorage
-- Lucide React
+| Technology | Purpose |
+|---|---|
+| React | Component-based user interface |
+| TypeScript | Static typing and application logic |
+| Vite | Development server and production builds |
+| React Router | Client-side navigation |
+| Tailwind CSS | UI styling |
+| Lucide React | Interface icons |
+| LocalStorage | Browser-based data persistence |
 
----
+## Application Architecture
 
-## Installation
+DeutschPal uses a feature-oriented frontend architecture.
+
+```text
+src/
+├── app/
+├── components/
+├── features/
+├── pages/
+└── shared/
+```
+
+The codebase separates application pages, reusable UI components, feature-specific functionality, and shared utilities.
+
+The application uses React components, custom hooks, context providers, and TypeScript types to organize state and application behavior.
+
+### Main Modules
+
+- Vocabulary Management
+- Practice
+- Verb Trainer
+- Knowledge Map
+- Learning Coach
+- Mistake History
+- Learning Timeline
+- Settings
+
+## How It Works
+
+**1. Build a vocabulary collection**
+
+Users create vocabulary entries with relevant grammatical information and examples.
+
+**2. Practice vocabulary**
+
+The application provides different practice modes based on the vocabulary being studied.
+
+**3. Review mistakes**
+
+Practice activity helps learners identify vocabulary that requires additional attention.
+
+**4. Monitor progress**
+
+Learning analytics and timeline features provide visibility into study activity and vocabulary mastery.
+
+**5. Manage learning data**
+
+Vocabulary can be stored locally and transferred using the available import and export features.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm
+
+### Installation
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/<your-username>/deutschpal.git
+git clone https://github.com/alexia130/deutschpal.git
+```
+
+Navigate to the project:
+
+```bash
+cd deutschpal
 ```
 
 Install dependencies:
@@ -100,59 +165,72 @@ Start the development server:
 npm run dev
 ```
 
+Open the local URL displayed by Vite in your browser.
+
+### Code Quality
+
+Run ESLint:
+
+```bash
+npm run lint
+```
+
 Create a production build:
 
 ```bash
 npm run build
 ```
 
----
+The build process includes TypeScript compilation and Vite production bundling.
 
-## Project Structure
+## Data Storage
 
-```
-src/
-│
-├── app/
-├── features/
-├── pages/
-├── shared/
-└── components/
-```
+DeutschPal uses browser-based LocalStorage to persist learning data.
 
-The application follows a feature-oriented architecture where each major module contains its own components, hooks, business logic and types.
+The application can be used locally without configuring an external database or backend service.
 
----
+Users can manage vocabulary backups through the import and export functionality.
 
-## Main Modules
+**Note:** LocalStorage data is associated with the browser and origin. Clearing browser storage may remove saved learning data, so exporting backups is recommended.
 
-```
-Vocabulary
-Practice
-Verb Trainer
-Knowledge Map
-Learning Coach
-Mistakes
-Timeline
-Settings
-```
+## Screenshots
 
----
+Screenshots of the application interface will be added here.
 
-## Roadmap
+Suggested views:
 
-Future versions may include:
+- Vocabulary dashboard
+- Interactive practice session
+- Learning analytics dashboard
+
+## Future Improvements
+
+Potential future developments include:
 
 - User authentication
-- Cloud synchronization
+- Cloud synchronization across devices
 - Mobile application
-- Dark mode
 - Speech recognition
-- AI conversation practice
-- Advanced spaced repetition
+- AI-assisted conversation practice
+- Further improvements to spaced repetition
+- Expanded learning analytics
 
----
+## Project Purpose
+
+DeutschPal is a personal software development project focused on combining language learning with modern frontend engineering.
+
+The project demonstrates practical experience with:
+
+- React and TypeScript development
+- Component-based architecture
+- State management with React hooks and context
+- Interactive user interfaces
+- Browser-based data persistence
+- Modular application design
+- Frontend tooling and production builds
 
 ## License
 
-This project was developed for educational and personal learning purposes.
+Developed for educational and personal learning purposes.
+
+No open-source license has been specified.
