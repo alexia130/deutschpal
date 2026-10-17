@@ -626,11 +626,7 @@ function PracticePage() {
     currentIndex >=
       questions.length;
 
-  const dueItems =
-    useMemo(
-      () => getDueItems(),
-      [items],
-    );
+  const dueItems = getDueItems();
 
   const openMistakeSelections =
     useMemo(() => {

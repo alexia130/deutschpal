@@ -1,23 +1,21 @@
-import {
-  useContext,
-} from "react";
+
+import { useContext } from "react";
 
 import {
   LearningTimelineContext,
-} from "../context/LearningTimelineProvider";
+} from "../context/LearningTimelineContext";
 
 export type {
   AddTimelineEvent,
   LearningTimelineContextValue,
-} from "../context/LearningTimelineProvider";
+} from "../context/LearningTimelineContext";
 
 export function useLearningTimeline() {
-  const context =
-    useContext(
-      LearningTimelineContext,
-    );
+  const context = useContext(
+    LearningTimelineContext,
+  );
 
-  if (!context) {
+  if (context === undefined) {
     throw new Error(
       "useLearningTimeline must be used inside LearningTimelineProvider.",
     );

@@ -500,17 +500,19 @@ function VocabularyPage() {
         )}
       </Card>
 
-      <VocabularyDrawer
-        open={drawerOpen}
-        item={selectedItem}
-        onClose={closeDrawer}
-        onSave={handleSave}
-        onDelete={
-          selectedItem
-            ? handleDeleteSelectedItem
-            : undefined
-        }
-      />
+{drawerOpen && (
+  <VocabularyDrawer
+    open={true}
+    item={selectedItem}
+    onClose={closeDrawer}
+    onSave={handleSave}
+    onDelete={
+      selectedItem
+        ? handleDeleteSelectedItem
+        : undefined
+    }
+  />
+)}
     </>
   );
 }

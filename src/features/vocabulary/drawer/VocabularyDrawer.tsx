@@ -1,5 +1,6 @@
+
 import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type {
   VocabularyFormData,
@@ -23,19 +24,15 @@ type DraftForm = {
   german: string;
   level: VocabularyLevel;
   favorite: boolean;
-
   article: "der" | "die" | "das";
   plural: string;
-
   auxiliary: "haben" | "sein";
   praeteritum: string;
   perfekt: string;
   reflexive: boolean;
   separable: boolean;
-
   comparative: string;
   superlative: string;
-
   meanings: VocabularyMeaning[];
 };
 
@@ -54,22 +51,64 @@ function createEmptyForm(): DraftForm {
     german: "",
     level: "B1",
     favorite: false,
-
     article: "die",
     plural: "",
-
     auxiliary: "haben",
     praeteritum: "",
     perfekt: "",
     reflexive: false,
     separable: false,
-
     comparative: "",
     superlative: "",
-
     meanings: [createEmptyMeaning()],
   };
 }
+
+function createFormFromItem(
+  item?: VocabularyItem | null,
+): DraftForm {
+  if (!item) {
+    return createEmptyForm();
+  }
+
+  return {
+    type: item.type,
+    german: item.german,
+    level: item.level,
+    favorite: item.favorite,
+    article:
+      item.type === "noun" ? item.article : "die",
+    plural:
+      item.type === "noun" ? item.plural : "",
+    auxiliary:
+      item.type === "verb" ? item.auxiliary : "haben",
+    praeteritum:
+      item.type === "verb" ? item.praeteritum : "",
+    perfekt:
+      item.type === "verb" ? item.perfekt : "",
+    reflexive:
+      item.type === "verb" ? item.reflexive : false,
+    separable:
+      item.type === "verb" ? item.separable : false,
+    comparative:
+      item.type === "adjective" ? item.comparative : "",
+    superlative:
+      item.type === "adjective" ? item.superlative : "",
+    meanings:
+      item.meanings.length > 0
+        ? item.meanings.map((meaning) => ({ ...meaning }))
+        : [createEmptyMeaning()],
+  };
+}
+
+const inputClass =
+  "w-full rounded-xl border border-[#E4DED8] bg-white px-3 py-2 outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]";
+
+const sectionClass =
+  "space-y-4 rounded-2xl border border-[#E8E2DC] bg-white p-5";
+
+const labelClass =
+  "mb-1 block text-sm font-medium text-[#4D4843]";
 
 export function VocabularyDrawer({
   open,
@@ -79,85 +118,20 @@ export function VocabularyDrawer({
   onDelete,
 }: VocabularyDrawerProps) {
   const [form, setForm] = useState<DraftForm>(
-    createEmptyForm,
+    () => createFormFromItem(item),
   );
 
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setError("");
-
-    if (!item) {
-      setForm(createEmptyForm());
-      return;
-    }
-
-    setForm({
-      type: item.type,
-      german: item.german,
-      level: item.level,
-      favorite: item.favorite,
-
-      article:
-        item.type === "noun"
-          ? item.article
-          : "die",
-
-      plural:
-        item.type === "noun"
-          ? item.plural
-          : "",
-
-      auxiliary:
-        item.type === "verb"
-          ? item.auxiliary
-          : "haben",
-
-      praeteritum:
-        item.type === "verb"
-          ? item.praeteritum
-          : "",
-
-      perfekt:
-        item.type === "verb"
-          ? item.perfekt
-          : "",
-
-      reflexive:
-        item.type === "verb"
-          ? item.reflexive
-          : false,
-
-      separable:
-        item.type === "verb"
-          ? item.separable
-          : false,
-
-      comparative:
-        item.type === "adjective"
-          ? item.comparative
-          : "",
-
-      superlative:
-        item.type === "adjective"
-          ? item.superlative
-          : "",
-
-      meanings:
-        item.meanings.length > 0
-          ? item.meanings.map((meaning) => ({
-              ...meaning,
-            }))
-          : [createEmptyMeaning()],
-    });
-  }, [item, open]);
-
   if (!open) {
     return null;
+  }
+
+  function updateForm(patch: Partial<DraftForm>) {
+    setForm((currentForm) => ({
+      ...currentForm,
+      ...patch,
+    }));
   }
 
   function updateMeaning(
@@ -167,13 +141,9 @@ export function VocabularyDrawer({
   ) {
     setForm((currentForm) => ({
       ...currentForm,
-
       meanings: currentForm.meanings.map((meaning) =>
         meaning.id === id
-          ? {
-              ...meaning,
-              [field]: value,
-            }
+          ? { ...meaning, [field]: value }
           : meaning,
       ),
     }));
@@ -192,7 +162,6 @@ export function VocabularyDrawer({
   function deleteMeaning(id: string) {
     setForm((currentForm) => ({
       ...currentForm,
-
       meanings: currentForm.meanings.filter(
         (meaning) => meaning.id !== id,
       ),
@@ -210,29 +179,25 @@ export function VocabularyDrawer({
       return false;
     }
 
-    const hasEmptyTranslation = form.meanings.some(
-      (meaning) => !meaning.translation.trim(),
-    );
-
-    if (hasEmptyTranslation) {
+    if (
+      form.meanings.some(
+        (meaning) => !meaning.translation.trim(),
+      )
+    ) {
       setError(
         "Please complete the translation for every meaning.",
       );
       return false;
     }
 
-    if (
-      form.type === "noun" &&
-      !form.plural.trim()
-    ) {
+    if (form.type === "noun" && !form.plural.trim()) {
       setError("Please enter the plural form.");
       return false;
     }
 
     if (
       form.type === "verb" &&
-      (!form.praeteritum.trim() ||
-        !form.perfekt.trim())
+      (!form.praeteritum.trim() || !form.perfekt.trim())
     ) {
       setError(
         "Please complete both Präteritum and Perfekt.",
@@ -257,14 +222,11 @@ export function VocabularyDrawer({
       german: form.german.trim(),
       level: form.level,
       favorite: form.favorite,
-
       meanings: form.meanings.map((meaning) => ({
         id: meaning.id,
         translation: meaning.translation.trim(),
-        exampleGerman:
-          meaning.exampleGerman.trim(),
-        exampleRomanian:
-          meaning.exampleRomanian.trim(),
+        exampleGerman: meaning.exampleGerman.trim(),
+        exampleRomanian: meaning.exampleRomanian.trim(),
       })),
     };
 
@@ -317,11 +279,8 @@ export function VocabularyDrawer({
         <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ECE8E3] bg-[#FCFBF9]/95 px-6 py-5 backdrop-blur">
           <div>
             <h2 className="text-xl font-semibold text-[#1F1D1B]">
-              {item
-                ? "Edit vocabulary"
-                : "Add vocabulary"}
+              {item ? "Edit vocabulary" : "Add vocabulary"}
             </h2>
-
             <p className="mt-1 text-sm text-[#77716B]">
               Add grammar forms, meanings and examples.
             </p>
@@ -347,57 +306,35 @@ export function VocabularyDrawer({
             </div>
           )}
 
-          <section className="space-y-4 rounded-2xl border border-[#E8E2DC] bg-white p-5">
+          <section className={sectionClass}>
             <h3 className="font-semibold text-[#1F1D1B]">
               General information
             </h3>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                Type
-              </span>
-
+              <span className={labelClass}>Type</span>
               <select
                 value={form.type}
                 onChange={(event) =>
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    type: event.target
-                      .value as VocabularyType,
-                  }))
+                  updateForm({
+                    type: event.target.value as VocabularyType,
+                  })
                 }
-                className="w-full rounded-xl border border-[#E4DED8] bg-white px-3 py-2 outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                className={inputClass}
               >
-                <option value="noun">
-                  Noun
-                </option>
-
-                <option value="verb">
-                  Verb
-                </option>
-
-                <option value="adjective">
-                  Adjective
-                </option>
-
-                <option value="expression">
-                  Expression
-                </option>
+                <option value="noun">Noun</option>
+                <option value="verb">Verb</option>
+                <option value="adjective">Adjective</option>
+                <option value="expression">Expression</option>
               </select>
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                German
-              </span>
-
+              <span className={labelClass}>German</span>
               <input
                 value={form.german}
                 onChange={(event) =>
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    german: event.target.value,
-                  }))
+                  updateForm({ german: event.target.value })
                 }
                 placeholder={
                   form.type === "noun"
@@ -406,173 +343,120 @@ export function VocabularyDrawer({
                       ? "sich bewerben"
                       : "German word"
                 }
-                className="w-full rounded-xl border border-[#E4DED8] px-3 py-2 outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                className={inputClass}
                 required
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                Level
-              </span>
-
+              <span className={labelClass}>Level</span>
               <select
                 value={form.level}
                 onChange={(event) =>
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    level: event.target
-                      .value as VocabularyLevel,
-                  }))
+                  updateForm({
+                    level: event.target.value as VocabularyLevel,
+                  })
                 }
-                className="w-full rounded-xl border border-[#E4DED8] bg-white px-3 py-2 outline-none transition focus:border-[#E3B48D] focus:ring-4 focus:ring-[#FFF0E2]"
+                className={inputClass}
               >
-                {[
-                  "A1",
-                  "A2",
-                  "B1",
-                  "B2",
-                  "C1",
-                  "C2",
-                ].map((level) => (
-                  <option
-                    key={level}
-                    value={level}
-                  >
-                    {level}
-                  </option>
-                ))}
+                {["A1", "A2", "B1", "B2", "C1", "C2"].map(
+                  (level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ),
+                )}
               </select>
             </label>
           </section>
 
           {form.type === "noun" && (
-            <section className="space-y-4 rounded-2xl border border-[#E8E2DC] bg-white p-5">
+            <section className={sectionClass}>
               <h3 className="font-semibold text-[#1F1D1B]">
                 Noun forms
               </h3>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Article
-                </span>
-
+                <span className={labelClass}>Article</span>
                 <select
                   value={form.article}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      article: event.target
-                        .value as
+                    updateForm({
+                      article: event.target.value as
                         | "der"
                         | "die"
                         | "das",
-                    }))
+                    })
                   }
-                  className="w-full rounded-xl border border-[#E4DED8] bg-white px-3 py-2"
+                  className={inputClass}
                 >
-                  <option value="der">
-                    der
-                  </option>
-
-                  <option value="die">
-                    die
-                  </option>
-
-                  <option value="das">
-                    das
-                  </option>
+                  <option value="der">der</option>
+                  <option value="die">die</option>
+                  <option value="das">das</option>
                 </select>
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Plural
-                </span>
-
+                <span className={labelClass}>Plural</span>
                 <input
                   value={form.plural}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      plural: event.target.value,
-                    }))
+                    updateForm({ plural: event.target.value })
                   }
                   placeholder="Erfahrungen"
-                  className="w-full rounded-xl border border-[#E4DED8] px-3 py-2"
+                  className={inputClass}
                 />
               </label>
             </section>
           )}
 
           {form.type === "verb" && (
-            <section className="space-y-4 rounded-2xl border border-[#E8E2DC] bg-white p-5">
+            <section className={sectionClass}>
               <h3 className="font-semibold text-[#1F1D1B]">
                 Verb forms
               </h3>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Auxiliary
-                </span>
-
+                <span className={labelClass}>Auxiliary</span>
                 <select
                   value={form.auxiliary}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      auxiliary: event.target
-                        .value as
+                    updateForm({
+                      auxiliary: event.target.value as
                         | "haben"
                         | "sein",
-                    }))
+                    })
                   }
-                  className="w-full rounded-xl border border-[#E4DED8] bg-white px-3 py-2"
+                  className={inputClass}
                 >
-                  <option value="haben">
-                    haben
-                  </option>
-
-                  <option value="sein">
-                    sein
-                  </option>
+                  <option value="haben">haben</option>
+                  <option value="sein">sein</option>
                 </select>
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Präteritum
-                </span>
-
+                <span className={labelClass}>Präteritum</span>
                 <input
                   value={form.praeteritum}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      praeteritum:
-                        event.target.value,
-                    }))
+                    updateForm({
+                      praeteritum: event.target.value,
+                    })
                   }
                   placeholder="bewarb sich"
-                  className="w-full rounded-xl border border-[#E4DED8] px-3 py-2"
+                  className={inputClass}
                 />
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Perfekt
-                </span>
-
+                <span className={labelClass}>Perfekt</span>
                 <input
                   value={form.perfekt}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      perfekt: event.target.value,
-                    }))
+                    updateForm({ perfekt: event.target.value })
                   }
                   placeholder="hat sich beworben"
-                  className="w-full rounded-xl border border-[#E4DED8] px-3 py-2"
+                  className={inputClass}
                 />
               </label>
 
@@ -581,14 +465,11 @@ export function VocabularyDrawer({
                   type="checkbox"
                   checked={form.reflexive}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      reflexive:
-                        event.target.checked,
-                    }))
+                    updateForm({
+                      reflexive: event.target.checked,
+                    })
                   }
                 />
-
                 <span className="text-sm text-[#4D4843]">
                   Reflexive verb
                 </span>
@@ -599,14 +480,11 @@ export function VocabularyDrawer({
                   type="checkbox"
                   checked={form.separable}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      separable:
-                        event.target.checked,
-                    }))
+                    updateForm({
+                      separable: event.target.checked,
+                    })
                   }
                 />
-
                 <span className="text-sm text-[#4D4843]">
                   Separable verb
                 </span>
@@ -615,46 +493,36 @@ export function VocabularyDrawer({
           )}
 
           {form.type === "adjective" && (
-            <section className="space-y-4 rounded-2xl border border-[#E8E2DC] bg-white p-5">
+            <section className={sectionClass}>
               <h3 className="font-semibold text-[#1F1D1B]">
                 Adjective forms
               </h3>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Comparative
-                </span>
-
+                <span className={labelClass}>Comparative</span>
                 <input
                   value={form.comparative}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      comparative:
-                        event.target.value,
-                    }))
+                    updateForm({
+                      comparative: event.target.value,
+                    })
                   }
                   placeholder="zuverlässiger"
-                  className="w-full rounded-xl border border-[#E4DED8] px-3 py-2"
+                  className={inputClass}
                 />
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-[#4D4843]">
-                  Superlative
-                </span>
-
+                <span className={labelClass}>Superlative</span>
                 <input
                   value={form.superlative}
                   onChange={(event) =>
-                    setForm((currentForm) => ({
-                      ...currentForm,
-                      superlative:
-                        event.target.value,
-                    }))
+                    updateForm({
+                      superlative: event.target.value,
+                    })
                   }
                   placeholder="am zuverlässigsten"
-                  className="w-full rounded-xl border border-[#E4DED8] px-3 py-2"
+                  className={inputClass}
                 />
               </label>
             </section>
@@ -666,7 +534,6 @@ export function VocabularyDrawer({
                 <h3 className="font-semibold text-[#1F1D1B]">
                   Meanings
                 </h3>
-
                 <p className="mt-1 text-sm text-[#77716B]">
                   Add one or more Romanian meanings.
                 </p>
@@ -683,20 +550,16 @@ export function VocabularyDrawer({
             </div>
 
             <div className="space-y-4">
-              {form.meanings.map(
-                (meaning, index) => (
-                  <VocabularyMeaningCard
-                    key={meaning.id}
-                    meaning={meaning}
-                    index={index}
-                    canDelete={
-                      form.meanings.length > 1
-                    }
-                    onChange={updateMeaning}
-                    onDelete={deleteMeaning}
-                  />
-                ),
-              )}
+              {form.meanings.map((meaning, index) => (
+                <VocabularyMeaningCard
+                  key={meaning.id}
+                  meaning={meaning}
+                  index={index}
+                  canDelete={form.meanings.length > 1}
+                  onChange={updateMeaning}
+                  onDelete={deleteMeaning}
+                />
+              ))}
             </div>
           </section>
 
@@ -705,14 +568,11 @@ export function VocabularyDrawer({
               type="checkbox"
               checked={form.favorite}
               onChange={(event) =>
-                setForm((currentForm) => ({
-                  ...currentForm,
-                  favorite:
-                    event.target.checked,
-                }))
+                updateForm({
+                  favorite: event.target.checked,
+                })
               }
             />
-
             <span className="text-sm font-medium text-[#4D4843]">
               Add to favorites
             </span>
